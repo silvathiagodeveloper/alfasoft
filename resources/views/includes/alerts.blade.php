@@ -7,9 +7,15 @@
 @endif
 
 @if(session(config('constants.array_messages')))
-    <div class="alert alert-success">
-        @foreach(session(config('constants.array_messages')) as $message)
-            <p> {{ $message }}</p>
-        @endforeach
-    </div>
+    @foreach(session(config('constants.array_messages')) as $message)
+    <script>
+        $(document).Toasts('create', {
+            title: 'Sucesso',
+            body: '{{ $message }}',
+            class: 'toast bg-success fade show',
+            autohide: true,
+            delay: 3000
+        })
+    </script>
+    @endforeach
 @endif
