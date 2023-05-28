@@ -16,9 +16,8 @@ class UserSeeder extends Seeder
     {
         User::create(
             [
-                'tenant_id' => 1,
                 'name' => 'admin',
-                'email' => 'admin@alfasoft.com.br',
+                'email' => 'admin@alfasoft.com',
                 'email_verified_at' => now(),
                 'password' => bcrypt('123456')
             ]
