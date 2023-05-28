@@ -27,8 +27,8 @@ class ContactTest extends TestCase
 
     public function test_create_not_authenticated()
     {
-        $response = $this->call('GET', '/create');
-        $response->assertStatus(403);
+        $response = $this->call('GET', 'contacts/create');
+        $response->assertRedirect('/login');
     }
 
     public function test_create()
@@ -36,37 +36,35 @@ class ContactTest extends TestCase
         $user = $this->auth();
         $response = $this->actingAs($user)
                          ->withSession(['user' => $user])
-                         ->call('GET', '/create');
+                         ->call('GET', 'contacts/create');
         $response->assertStatus(200);
         $response->assertViewIs('contacts.create');
     }
 
     public function test_store_not_authenticated()
     {
-        $response = $this->call('POST', '/', ['name' => 'Test']);
-        $response->assertStatus(403);
+        $response = $this->call('POST', 'contacts/', ['name' => 'Test']);
+        $response->assertRedirect('/login');
     }
 
     public function test_error_store_same_contact() 
     {
         $user = $this->auth();
-        $contact = Contact::factory(1)->create(['contact' => '111111111']);
+        $contact = Contact::factory(1)->create(['name' => 'teste1', 'contact' => '111111111', 'email' => 'ad@alfasoft.com']);
         $response = $this->actingAs($user)
                          ->withSession(['user' => $user])
-                         ->call('POST', '/', ['contact' => '111111111']);
-        $response->assertStatus(400);    
-        $response->assertRedirect('/');
+                         ->call('POST', 'contacts/', ['name' => 'teste2', 'contact' => '111111111', 'email' => 'ad@alfasoft.pt']);
+        $response->assertSessionHasErrors(['contact']);
     }
 
     public function test_error_store_same_email() 
     {
         $user = $this->auth();
-        $contact = Contact::factory(1)->create(['email' => 'ad@alfasoft.com']);
+        $contact = Contact::factory(1)->create(['name' => 'teste1', 'contact' => '111111111', 'email' => 'ad@alfasoft.com']);
         $response = $this->actingAs($user)
                          ->withSession(['user' => $user])
-                         ->call('POST', '/', ['email' => 'ad@alfasoft.com']);
-        $response->assertStatus(400);    
-        $response->assertRedirect('/');
+                         ->call('POST', 'contacts/', ['name' => 'teste2', 'contact' => '111111112', 'email' => 'ad@alfasoft.com']);
+        $response->assertSessionHasErrors(['email']);
     }
 
     public function test_store() 
@@ -74,16 +72,15 @@ class ContactTest extends TestCase
         $user = $this->auth();
         $response = $this->actingAs($user)
                          ->withSession(['user' => $user])
-                         ->call('POST', '/', ['name' => 'Test']);
-        $response->assertStatus(302);    
-        $response->assertRedirect('/');
+                         ->call('POST', 'contacts/', ['name' => 'teste2', 'contact' => '111111112', 'email' => 'ad@alfasoft.com']);
+        $response->assertRedirect('/contacts');
     }
 
     public function test_show_not_authenticated()
     {
         $contact = Contact::factory(1)->create();
-        $response = $this->call('get', '/'.$contact->first()->id);
-        $response->assertStatus(403);
+        $response = $this->call('get', 'contacts/'.$contact->first()->id);
+        $response->assertRedirect('/login');
     }
 
     public function test_show() 
@@ -92,8 +89,7 @@ class ContactTest extends TestCase
         $contact = Contact::factory(1)->create(['name'=>'Test 1']);
         $response = $this->actingAs($user)
                          ->withSession(['user' => $user])
-                         ->call('get', '/'.$contact->first()->id);
-        $response->assertStatus(200);    
+                         ->call('get', 'contacts/'.$contact->first()->id);
         $response->assertViewHas('contact');
         $contact = $response->original['contact'];
         $this->assertEquals('Test 1', $contact['name']);
@@ -102,8 +98,8 @@ class ContactTest extends TestCase
     public function test_destroy_not_authenticated()
     {
         $contact = Contact::factory(1)->create();
-        $response = $this->call('DELETE', '/'.$contact->first()->id);
-        $response->assertStatus(403);
+        $response = $this->call('DELETE', 'contacts/'.$contact->first()->id);
+        $response->assertRedirect('/login');
     }
 
 
@@ -113,16 +109,15 @@ class ContactTest extends TestCase
         $contact = Contact::factory(1)->create();
         $response = $this->actingAs($user)
                          ->withSession(['user' => $user])
-                         ->call('DELETE', "/".$contact->first()->id);
-        $response->assertStatus(302);    
-        $response->assertRedirect('/');
+                         ->call('DELETE', "contacts/".$contact->first()->id);   
+        $response->assertRedirect('/contacts');
     }
 
     public function test_edit_not_authenticated()
     {
         $contact = Contact::factory(1)->create();
-        $response = $this->call('DELETE', '/'.$contact->first()->id.'/edit');
-        $response->assertStatus(403);
+        $response = $this->call('get', 'contacts/'.$contact->first()->id.'/edit');
+        $response->assertRedirect('/login');
     }
 
     public function test_edit() 
@@ -131,16 +126,16 @@ class ContactTest extends TestCase
         $contact = Contact::factory(1)->create();
         $response = $this->actingAs($user)
                          ->withSession(['user' => $user])
-                         ->call('get', '/'.$contact->first()->id.'/edit');
+                         ->call('get', 'contacts/'.$contact->first()->id.'/edit');
         $response->assertStatus(200);
-        $response->assertViewIs('contact.edit');
+        $response->assertViewIs('contacts.edit');
     }
 
     public function test_update_not_authenticated()
     {
         $contact = Contact::factory(1)->create();
-        $response = $this->call('PUT', '/'.$contact->first()->id, ['name' => 'Test']);
-        $response->assertStatus(403);
+        $response = $this->call('PUT', 'contacts/'.$contact->first()->id, ['name' => 'Test']);
+        $response->assertRedirect('/login');
     }
 
     public function test_update() 
@@ -149,11 +144,7 @@ class ContactTest extends TestCase
         $contact = Contact::factory(1)->create(['name'=>'Test 1']);
         $response = $this->actingAs($user)
                          ->withSession(['user' => $user])
-                         ->call('PUT', "/".$contact->first()->id, ['name' => 'Test 2']);
-        $response->assertStatus(302);    
-        $response->assertRedirect('/');
-        $response->assertViewHas('contact');
-        $contact = $response->original['contact'];
-        $this->assertEquals('Test 2', $contact['name']);
+                         ->call('PUT', "contacts/".$contact->first()->id, ['name' => 'Test 2', 'contact' => '111111112', 'email' => 'ad@alfasoft.com']);
+        $response->assertRedirect('/contacts');
     }
 }
