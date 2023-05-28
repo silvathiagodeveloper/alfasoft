@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,11 +16,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [ContactController::class, 'index'])->name('home.index');
-Route::get('contacts', [ContactController::class, 'index']  )->name('contacts.index');
+Route::get('/contacts', [ContactController::class, 'index']  )->name('contacts.index');
+Route::get('/home', [HomeController::class, 'index'])->name('home');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])
     ->group(function () {
@@ -32,3 +31,7 @@ Route::middleware(['auth', 'verified'])
 });
 
 require __DIR__.'/auth.php';
+
+Auth::routes();
+
+

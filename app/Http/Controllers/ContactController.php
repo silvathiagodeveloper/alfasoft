@@ -33,7 +33,10 @@ class ContactController extends Controller
     {
         $model = $this->repository->create($request->all());
 
-        return redirect()->route('contacts.index');
+        return redirect()->route('contacts.index')
+                         ->with(config('constants.array_messages'),[
+                            "Registro {$model->name} criado com sucesso!"
+                        ]);
     }
 
     public function show($id) 
@@ -63,6 +66,9 @@ class ContactController extends Controller
     {
         $this->repository->update($id, $request->except(['_token','_method']));
 
-        return redirect()->route('contacts.index');
+        return redirect()->route('contacts.index')
+                        ->with(config('constants.array_messages'),[
+                        "Registro alterado com sucesso!"
+                    ]);
     }
 }
