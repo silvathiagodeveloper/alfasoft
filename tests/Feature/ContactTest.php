@@ -67,6 +67,24 @@ class ContactTest extends TestCase
         $response->assertSessionHasErrors(['email']);
     }
 
+    public function test_error_store_format_contact() 
+    {
+        $user = $this->auth();
+        $response = $this->actingAs($user)
+                         ->withSession(['user' => $user])
+                         ->call('POST', 'contacts/', ['name' => 'teste2', 'contact' => '(48)99909-0909', 'email' => 'ad@alfasoft.pt']);
+        $response->assertSessionHasErrors(['contact']);
+    }
+
+    public function test_error_store_format_email() 
+    {
+        $user = $this->auth();
+        $response = $this->actingAs($user)
+                         ->withSession(['user' => $user])
+                         ->call('POST', 'contacts/', ['name' => 'teste2', 'contact' => '999999999', 'email' => 'ad']);
+        $response->assertSessionHasErrors(['email']);
+    }
+
     public function test_store() 
     {
         $user = $this->auth();
