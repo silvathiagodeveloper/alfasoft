@@ -47,6 +47,28 @@ class ContactTest extends TestCase
         $response->assertStatus(403);
     }
 
+    public function test_error_store_same_contact() 
+    {
+        $user = $this->auth();
+        $contact = Contact::factory(1)->create(['contact' => '111111111']);
+        $response = $this->actingAs($user)
+                         ->withSession(['user' => $user])
+                         ->call('POST', '/', ['contact' => '111111111']);
+        $response->assertStatus(400);    
+        $response->assertRedirect('/');
+    }
+
+    public function test_error_store_same_email() 
+    {
+        $user = $this->auth();
+        $contact = Contact::factory(1)->create(['email' => 'ad@alfasoft.com']);
+        $response = $this->actingAs($user)
+                         ->withSession(['user' => $user])
+                         ->call('POST', '/', ['email' => 'ad@alfasoft.com']);
+        $response->assertStatus(400);    
+        $response->assertRedirect('/');
+    }
+
     public function test_store() 
     {
         $user = $this->auth();
